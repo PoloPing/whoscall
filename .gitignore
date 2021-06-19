@@ -1,0 +1,10 @@
+venv
+.idea
+__pycache__/
+*.pid
+*.db
+*.swp
+whoscall.iml
+whoscall.ipr
+whoscall.iws
+.ideaDataSources/

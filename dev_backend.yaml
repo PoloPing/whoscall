@@ -1,0 +1,52 @@
+version: '3.6'
+services:
+  web:
+    restart: always
+    image: whoscall:latest
+    build: .
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - ./env/local.conf
+    entrypoint:
+      - uwsgi
+      - wsgi.ini
+#    entrypoint:
+#      - flask
+#      - run
+#      - --host=0.0.0.0
+#      - --port=80
+    networks:
+      - whoscall-bridge
+
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0.23
+    restart: always
+    env_file:
+      - ./env/local.conf
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - whoscall-bridge
+    ports:
+      - "3306:3306"
+  nginx:
+    restart: always
+    image: nginx:1.19.5
+    depends_on:
+      - web
+    volumes:
+      - ./nginx_conf/local:/etc/nginx/conf.d
+    networks:
+      - whoscall-bridge
+    ports:
+      - "80:80"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+networks:
+  whoscall-bridge:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
